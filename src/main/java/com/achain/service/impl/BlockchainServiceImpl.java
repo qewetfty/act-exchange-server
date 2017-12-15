@@ -208,13 +208,16 @@ public class BlockchainServiceImpl implements IBlockchainService {
         List<ActTransaction> actTransactions = new ArrayList<>();
 
         List<ActBlock> actBlocks = new ArrayList<>();
-        map.keySet().stream().forEach(s -> {
+        map.keySet().forEach(s -> {
             ActBlock actBlock = new ActBlock();
             actBlock.setBlockId(s);
             actBlock.setTransFee(0L);
             actBlock.setTransAmount(0L);
-            map.get(s).stream().forEach(j -> {
+            map.get(s).forEach(j -> {
                 ActTransaction actTransaction = getTransactions(s, j.toString());
+                if(Objects.isNull(actTransaction)){
+                    return;
+                }
                 actTransactions.add(actTransaction);
                 if ("ACT".equals(actTransaction.getCoinType())) {
                     actBlock.setTransAmount(actBlock.getTransAmount() + actTransaction.getAmount());
