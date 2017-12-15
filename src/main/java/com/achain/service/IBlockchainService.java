@@ -47,5 +47,11 @@ public interface IBlockchainService {
      */
     void saveTransactions(Map<String, JSONArray> map);
 
+    /**
+     * 查询地址余额
+     * @param actAddress　act地址
+     */
+    long getBalance(String actAddress);
+
 
 }

@@ -245,6 +245,31 @@ public class BlockchainServiceImpl implements IBlockchainService {
     }
 
 
+    @Override
+    public long getBalance(String actAddress) {
+        try {
+            JSONArray tempJson = new JSONArray();
+            tempJson.add(actAddress);
+            long result1 = 0L;
+            String result =
+                httpClient.post(config.walletUrl, config.rpcUser, "blockchain_list_address_balances", tempJson);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            JSONArray jsonArray = jsonObject.getJSONArray("result");
+            if (jsonArray != null && jsonArray.size() > 0) {
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    log.info(jsonArray.getJSONArray(i).toJSONString());
+                    log.info(jsonArray.getJSONArray(i).getJSONObject(1).toJSONString());
+                    result1 = result1 + jsonArray.getJSONArray(i).getJSONObject(1).getLong("balance");
+                }
+                return result1;
+            }
+        } catch (Exception e) {
+            log.error("BlockchainServiceImpl|getBalance|[userAddress={}]出现异常", actAddress, e);
+        }
+        return 0L;
+    }
+
+
     private ActTransaction getTransactions(String blockId, String trxId) {
         ActTransaction actTransaction = new ActTransaction();
         actTransaction.setBlockId(blockId);

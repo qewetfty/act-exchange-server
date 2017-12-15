@@ -2,10 +2,18 @@ package com.achain.controller;
 
 import com.achain.conf.Config;
 import com.achain.service.IActTransactionMapperService;
+import com.achain.service.IBlockchainService;
 import com.achain.utils.SDKHttpClient;
 import com.alibaba.fastjson.JSONArray;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -16,10 +24,7 @@ import java.util.Map;
 @RequestMapping("/api")
 public class DealParamController {
 
-    //  @Value("${file.path}")
-    private String path;
-    //  @Value("${walletName}")
-    private String walletName;
+
 
     @Autowired
     private IActTransactionMapperService actTransactionMapperService;
@@ -29,6 +34,8 @@ public class DealParamController {
 
     @Autowired
     private SDKHttpClient httpClient;
+    @Autowired
+    private IBlockchainService blockchainService;
 
 
     /**
@@ -50,7 +57,6 @@ public class DealParamController {
                                           @RequestParam(value = "from_account_name") String from_account_name,
                                           @RequestParam(value = "to_address") String to_address,
                                           @RequestParam(value = "memo_message") String memo_message,
-                                          @RequestParam(value = "trxId") String trxId,
                                           @PathVariable(value = "coinType") String coinType) {
         JSONArray params = new JSONArray();
         String url = config.walletUrl;
@@ -75,6 +81,20 @@ public class DealParamController {
             result = httpClient.post(url, rpcUser, "call_contract", params);
         }
         return result;
+    }
+
+
+    /**
+     * 查询账户act余额,获得的余额需要除以10的五次方
+     * @param actAddress act地址
+     * @return 余额
+     */
+    @GetMapping("balance")
+    public Long getBalance(String actAddress){
+        if(StringUtils.isEmpty(actAddress)){
+            return 0L;
+        }
+        return blockchainService.getBalance(actAddress);
     }
 
 }
