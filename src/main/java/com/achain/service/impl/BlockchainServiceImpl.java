@@ -271,6 +271,7 @@ public class BlockchainServiceImpl implements IBlockchainService {
                 createTaskJson = createTaskJson.getJSONObject("result");
                 actTransaction.setExtraTrxId(StringUtils.isEmpty(result_trx_id) ? trxId : result_trx_id);
                 actTransaction.setTrxId(createTaskJson.getString("orig_trx_id"));
+
                 JSONObject temp = createTaskJson.getJSONObject("to_contract_ledger_entry");
                 actTransaction.setFromAddr(temp.getString("from_account"));
                 actTransaction.setFromAcct(temp.getString("from_account_name"));
@@ -281,6 +282,11 @@ public class BlockchainServiceImpl implements IBlockchainService {
                 actTransaction.setFee(temp.getJSONObject("fee").getInteger("amount"));
                 actTransaction.setTrxTime(dealTime(createTaskJson.getString("timestamp")));
                 actTransaction.setMemo(temp.getString("memo"));
+
+                //不是他们的合约id忽略
+                if(!config.contractIds.contains(actTransaction.getContractId())){
+                    return null;
+                }
                 if ("false".equals(createTaskJson.getString("is_completed"))) {
                     actTransaction.setIsCompleted((byte) 0);
                 }
@@ -292,6 +298,9 @@ public class BlockchainServiceImpl implements IBlockchainService {
                 JSONObject jsonObject = getEvent(blockId, trxId, actTransaction);
                 actTransaction.setEventType(jsonObject.getString("event_type"));
                 actTransaction.setEventParam(jsonObject.getString("event_param"));
+
+
+
                 if (trx_type == TrxType.TRX_TYPE_CALL_CONTRACT.getIntKey() &&
                     actTransaction.getCalledAbi().contains(ContractCoinType.COIN_TRANSFER_COIN.getValue())) {
                     log.info("ActBrowserServiceImpl|saveActBlock|[actTransaction={}]", actTransaction);
@@ -326,10 +335,11 @@ public class BlockchainServiceImpl implements IBlockchainService {
                         }
                     }
                 }
-                String type = dealDataByTrxType(actTransaction.getContractId(), trx_type, actTransaction);
-                if (trx_type == TrxType.TRX_TYPE_CALL_CONTRACT.getIntKey()) {
-                    actTransaction.setCoinType(type);
-                }
+
+//                String type = dealDataByTrxType(actTransaction.getContractId(), trx_type, actTransaction);
+//                if (trx_type == TrxType.TRX_TYPE_CALL_CONTRACT.getIntKey()) {
+//                    actTransaction.setCoinType(type);
+//                }
 
             } else {
                 String resultSignee = httpClient.post(config.walletUrl, config.rpcUser, "blockchain_get_pretty_transaction", jsonArray);
