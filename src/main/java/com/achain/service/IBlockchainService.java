@@ -4,6 +4,8 @@ package com.achain.service;
 import com.achain.domain.dto.TransactionDTO;
 import com.alibaba.fastjson.JSONArray;
 
+import java.util.Map;
+
 /**
  * @author fyk
  * @since 2017-11-29 19:09
@@ -34,6 +36,16 @@ public interface IBlockchainService {
      * @return Map中包含两个参数，from是打币者的地址，amount是打币者的打币数量
      */
     TransactionDTO getTransaction(long blockNum, String trxId);
+
+
+    Map<String, JSONArray> saveActBlock(String blocknum);
+
+
+    /**
+     * 保存一个块上数据
+     * @param map
+     */
+    void saveTransactions(Map<String, JSONArray> map);
 
 
 }

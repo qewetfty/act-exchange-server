@@ -8,8 +8,9 @@ import com.alibaba.fastjson.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
-import java.util.Objects;
+import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,17 +37,18 @@ public class TransactionJob {
             return;
         }
         for (long blockCount = config.headerBlockCount + 1; blockCount <= headerBlockCount; ++blockCount) {
-            JSONArray transactionList = blockchainService.getBlock(blockCount);
-            if (transactionList.isEmpty()) {
-                continue;
-            }
-            for (Object transaction : transactionList) {
-                TransactionDTO transactionDTO = blockchainService.getTransaction(blockCount, (String) transaction);
-                if (Objects.nonNull(transactionDTO)) {
-                    saveTransaction(transactionDTO);
-
+            Map<String, JSONArray> map = blockchainService.saveActBlock(Long.toString(blockCount));
+            if (!CollectionUtils.isEmpty(map)) {
+                try {
+                    blockchainService.saveTransactions(map);
+                } catch (Exception e) {
+                    log.error("doTransactionJob|本次任务执行出现异常", e);
+                    continue;
                 }
+            } else {
+                break;
             }
+
         }
         config.headerBlockCount = headerBlockCount;
         log.info("doTransactionJob|结束|nowHeaderBlockNum={}", config.headerBlockCount);
@@ -54,6 +56,7 @@ public class TransactionJob {
 
     /**
      * 扫块数据入库
+     *
      * @param transactionDTO 数据
      */
     private void saveTransaction(TransactionDTO transactionDTO) {
