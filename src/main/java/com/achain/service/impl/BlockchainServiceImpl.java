@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -194,7 +195,11 @@ public class BlockchainServiceImpl implements IBlockchainService {
                 createTaskJson.getLong("signee_shares_issued") + createTaskJson.getLong("signee_fees_collected"));
             actBlock.setTransAmount(0L);
             actBlock.setStatus(TaskDealStatus.TASK_INI.getIntKey());
-            actBlockMapperService.insert(actBlock);
+            if(actBlockMapperService.getByBlockNum(actBlock.getBlockNum()).size() == 0 &&
+                actBlockMapperService.getByBlockId(actBlock.getBlockId()).size() == 0){
+                actBlockMapperService.insert(actBlock);
+            }
+
         } catch (Exception er) {
             log.error("BlockchainServiceImpl|saveActBlock|[blocknum={}]出现异常", blocknum, er);
             return null;
@@ -202,6 +207,7 @@ public class BlockchainServiceImpl implements IBlockchainService {
         return map;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveTransactions(Map<String, JSONArray> map) {
         log.info("BlockchainServiceImpl|saveTransactions 开始处理[map={}]", map);
@@ -242,6 +248,31 @@ public class BlockchainServiceImpl implements IBlockchainService {
 
             });
         }
+    }
+
+
+    @Override
+    public long getBalance(String actAddress) {
+        try {
+            JSONArray tempJson = new JSONArray();
+            tempJson.add(actAddress);
+            long result1 = 0L;
+            String result =
+                httpClient.post(config.walletUrl, config.rpcUser, "blockchain_list_address_balances", tempJson);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            JSONArray jsonArray = jsonObject.getJSONArray("result");
+            if (jsonArray != null && jsonArray.size() > 0) {
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    log.info(jsonArray.getJSONArray(i).toJSONString());
+                    log.info(jsonArray.getJSONArray(i).getJSONObject(1).toJSONString());
+                    result1 = result1 + jsonArray.getJSONArray(i).getJSONObject(1).getLong("balance");
+                }
+                return result1;
+            }
+        } catch (Exception e) {
+            log.error("BlockchainServiceImpl|getBalance|[userAddress={}]出现异常", actAddress, e);
+        }
+        return 0L;
     }
 
 
@@ -353,15 +384,17 @@ public class BlockchainServiceImpl implements IBlockchainService {
                 actTransaction.setFromAcct(temp.getString("from_account_name"));
                 actTransaction.setToAcct(temp.getString("to_account_name"));
                 actTransaction.setToAddr(temp.getString("to_account"));
-                if(!config.checkActAddress.contains(actTransaction.getFromAddr()) &&
-                   !config.checkActAddress.contains(actTransaction.getToAddr())){
-                    return null;
-                }
                 actTransaction.setAmount(temp.getJSONObject("amount").getLong("amount"));
                 actTransaction.setFee(createTaskJson.getJSONObject("fee").getInteger("amount"));
                 actTransaction.setTrxTime(dealTime(createTaskJson.getString("timestamp")));
                 actTransaction.setMemo(temp.getString("memo"));
                 actTransaction.setIsCompleted((byte) 0);
+            }
+
+
+            if(!actTransaction.getFromAddr().contains(config.actAddresses) &&
+               !actTransaction.getToAddr().contains(config.actAddresses)){
+                return null;
             }
             actTransaction.setBlockNum(createTaskJson.getLong("block_num"));
             actTransaction.setBlockPosition(createTaskJson.getInteger("block_position"));
@@ -371,6 +404,9 @@ public class BlockchainServiceImpl implements IBlockchainService {
         }
         return actTransaction;
     }
+
+
+
 
     private JSONObject getEvent(String blockId, String trxId, ActTransaction actTransaction) {
         JSONArray jsonArrayEvent = new JSONArray();

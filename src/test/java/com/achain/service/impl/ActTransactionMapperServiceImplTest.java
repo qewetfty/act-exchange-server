@@ -20,7 +20,7 @@ public class ActTransactionMapperServiceImplTest {
     private IActTransactionMapperService actTransactionMapperService;
     @Test
     public void walletAccountTransactionHistory() {
-        Map<String, Object> stringObjectMap = actTransactionMapperService.WalletAccountTransactionHistory(2314L, "12");
+        Map<String, Object> stringObjectMap = actTransactionMapperService.walletAccountTransactionHistory(2314L, "12","fdsaf");
         System.out.println("fdsaf");
     }
 }

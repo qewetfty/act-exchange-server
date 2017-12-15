@@ -24,7 +24,7 @@ public class ActTransactionMapperServiceImpl extends ServiceImpl<ActTransactionM
     implements IActTransactionMapperService {
 
     @Override
-    public Map<String, Object> WalletAccountTransactionHistory(Long start, String address) {
+    public Map<String, Object> walletAccountTransactionHistory(Long start, String address, String contractId) {
         Map<String, Object> map = new HashMap<>();
         map.put("data", null);
         if (start == null || StringUtils.isEmpty(address)) {
@@ -32,11 +32,23 @@ public class ActTransactionMapperServiceImpl extends ServiceImpl<ActTransactionM
             return map;
         }
         Wrapper<ActTransaction> wrapper = new EntityWrapper<>();
-        wrapper.where("to_addr = '" + address+"'")
-                .and("block_num >= " + start)
-                .orNew("from_addr = '" + address+"'")
-                .and("block_num >= " + start)
-                .orderBy("block_num ASC");
+
+        if(StringUtils.isEmpty(contractId)){
+            wrapper.where("to_addr = '" + address+"'")
+                   .and("block_num >= " + start)
+                   .orNew("from_addr = '" + address+"'")
+                   .and("block_num >= " + start)
+                   .orderBy("block_num ASC");
+        }else {
+            wrapper.where("to_addr = '" + address+"'")
+                   .and("block_num >= " + start)
+                   .and("contract_id= '"+contractId+"'")
+                   .orNew("from_addr = '" + address+"'")
+                   .and("contract_id= '"+contractId+"'")
+                   .and("block_num >= " + start)
+                   .orderBy("block_num ASC");
+        }
+
         List<ActTransaction> actTransactionList = baseMapper.selectList(wrapper);
         if (CollectionUtils.isEmpty(actTransactionList)) {
             map.put("msg", "没有更多的交易记录");
