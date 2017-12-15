@@ -350,6 +350,10 @@ public class BlockchainServiceImpl implements IBlockchainService {
                 actTransaction.setFromAcct(temp.getString("from_account_name"));
                 actTransaction.setToAcct(temp.getString("to_account_name"));
                 actTransaction.setToAddr(temp.getString("to_account"));
+                if(!config.checkActAddress.contains(actTransaction.getFromAddr()) &&
+                   !config.checkActAddress.contains(actTransaction.getToAddr())){
+                    return null;
+                }
                 actTransaction.setAmount(temp.getJSONObject("amount").getLong("amount"));
                 actTransaction.setFee(createTaskJson.getJSONObject("fee").getInteger("amount"));
                 actTransaction.setTrxTime(dealTime(createTaskJson.getString("timestamp")));
