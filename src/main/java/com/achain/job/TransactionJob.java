@@ -40,10 +40,10 @@ public class TransactionJob {
 
     @Scheduled(fixedDelay = 10 * 1000)
     public void doTransactionJob() {
-        log.info("doTransactionJob|开始|HeaderBlockNum={}", config.headerBlockCount);
-        long headerBlockCount = blockchainService.getBlockCount();
         ActBlock previousBlock = getBlockNum();
         Long preBlockNum = previousBlock.getBlockNum();
+        log.info("doTransactionJob|开始|HeaderBlockNum={}",preBlockNum);
+        long headerBlockCount = blockchainService.getBlockCount();
         if (headerBlockCount <= preBlockNum) {
             log.info("doTransactionJob|最大块号为[{}],不需要进行扫块", headerBlockCount);
             return;
