@@ -1,12 +1,17 @@
 package com.achain.controller;
 
+import com.achain.utils.AsymmetricEncryptionUtils;
+import com.achain.utils.SDKHttpClient;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.achain.utils.AsymmetricEncryptionUtils;
-import com.achain.utils.HttpConfig;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
@@ -30,11 +35,11 @@ public class WalletDealController {
   @Value("${exchange_transaction_query_path}")
   private String exchange_transaction_query_path;
 
-  private final HttpConfig httpConfig;
+  private final SDKHttpClient httpConfig;
 
   @Autowired
-  public WalletDealController(HttpConfig httpConfig) {
-    this.httpConfig = httpConfig;
+  public WalletDealController(SDKHttpClient sdkHttpClient) {
+    this.httpConfig = sdkHttpClient;
   }
 
 
