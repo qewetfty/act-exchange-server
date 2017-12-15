@@ -1,6 +1,8 @@
 package com.achain.conf;
 
 
+import com.baomidou.mybatisplus.plugins.PaginationInterceptor;
+
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
