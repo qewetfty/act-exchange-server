@@ -24,7 +24,7 @@ public class ActTransactionMapperServiceImpl extends ServiceImpl<ActTransactionM
     implements IActTransactionMapperService {
 
     @Override
-    public Map<String, Object> WalletAccountTransactionHistory(Long start, String address, String contractId) {
+    public Map<String, Object> walletAccountTransactionHistory(Long start, String address, String contractId) {
         Map<String, Object> map = new HashMap<>();
         map.put("data", null);
         if (start == null || StringUtils.isEmpty(address)) {

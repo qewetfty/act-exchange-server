@@ -47,9 +47,9 @@ public class DealParamController {
     @RequestMapping(value = "/wallet_address_transaction_history", method = RequestMethod.GET)
     public Map<String, Object> createWalletAccountTransactionHistory(@RequestParam(value = "start") long start,
                                                                      @RequestParam(value = "address") String address,
-                                                                     @RequestParam(value = "contract_id") String contractId) {
-        Map<String, Object> map = actTransactionMapperService.WalletAccountTransactionHistory(start, address);
-        return map;
+                                                                     @RequestParam(value = "contract_id",required = false) String contractId) {
+        return actTransactionMapperService.walletAccountTransactionHistory(start, address,contractId);
+
     }
 
     @RequestMapping(value = "/wallet_transfer_to_address", method = RequestMethod.GET)
