@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -194,7 +195,11 @@ public class BlockchainServiceImpl implements IBlockchainService {
                 createTaskJson.getLong("signee_shares_issued") + createTaskJson.getLong("signee_fees_collected"));
             actBlock.setTransAmount(0L);
             actBlock.setStatus(TaskDealStatus.TASK_INI.getIntKey());
-            actBlockMapperService.insert(actBlock);
+            if(actBlockMapperService.getByBlockNum(actBlock.getBlockNum()).size() == 0 &&
+                actBlockMapperService.getByBlockId(actBlock.getBlockId()).size() == 0){
+                actBlockMapperService.insert(actBlock);
+            }
+
         } catch (Exception er) {
             log.error("BlockchainServiceImpl|saveActBlock|[blocknum={}]出现异常", blocknum, er);
             return null;
@@ -202,6 +207,7 @@ public class BlockchainServiceImpl implements IBlockchainService {
         return map;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveTransactions(Map<String, JSONArray> map) {
         log.info("BlockchainServiceImpl|saveTransactions 开始处理[map={}]", map);
@@ -385,8 +391,9 @@ public class BlockchainServiceImpl implements IBlockchainService {
                 actTransaction.setIsCompleted((byte) 0);
             }
 
-            if(!config.checkActAddress.contains(actTransaction.getFromAddr()) &&
-               !config.checkActAddress.contains(actTransaction.getToAddr())){
+
+            if(!actTransaction.getFromAddr().contains(config.actAddresses) &&
+               !actTransaction.getToAddr().contains(config.actAddresses)){
                 return null;
             }
             actTransaction.setBlockNum(createTaskJson.getLong("block_num"));
@@ -397,6 +404,9 @@ public class BlockchainServiceImpl implements IBlockchainService {
         }
         return actTransaction;
     }
+
+
+
 
     private JSONObject getEvent(String blockId, String trxId, ActTransaction actTransaction) {
         JSONArray jsonArrayEvent = new JSONArray();

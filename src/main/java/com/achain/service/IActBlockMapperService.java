@@ -15,4 +15,11 @@ public interface IActBlockMapperService extends IService<ActBlock> {
     List<ActBlock> getBlocks(String blockId);
 
     List<ActBlock> getByBlockIdAndStatus(String blockId,Integer status);
+
+
+    List<ActBlock> getByBlockNum(Long blockNum);
+
+    List<ActBlock> getByBlockId(String blockId);
+
+    ActBlock getMaxBlock();
 }
