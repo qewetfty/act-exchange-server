@@ -1,12 +1,15 @@
 package com.achain.domain.entity;
 
 
+import com.baomidou.mybatisplus.annotations.TableName;
+
 import java.io.Serializable;
 import java.util.Date;
 
-import lombok.ToString;
+import lombok.Data;
 
-@ToString(callSuper = true)
+@TableName("tb_act_block")
+@Data
 public class ActBlock implements Serializable {
     private static final long serialVersionUID = 1L;
 
