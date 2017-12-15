@@ -9,7 +9,6 @@ import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,28 +46,27 @@ public class DealParamController {
      */
     @RequestMapping(value = "/wallet_address_transaction_history", method = RequestMethod.GET)
     public Map<String, Object> createWalletAccountTransactionHistory(@RequestParam(value = "start") long start,
-                                                                     @RequestParam(value = "address") String address) {
+                                                                     @RequestParam(value = "address") String address,
+                                                                     @RequestParam(value = "contract_id") String contractId) {
         Map<String, Object> map = actTransactionMapperService.WalletAccountTransactionHistory(start, address);
         return map;
     }
 
-    @RequestMapping(value = "/wallet_transfer_to_address/{coinType}", method = RequestMethod.GET)
+    @RequestMapping(value = "/wallet_transfer_to_address", method = RequestMethod.GET)
     public String walletTransferToAddress(@RequestParam(value = "amount_to_transfer") String amount_to_transfer,
                                           @RequestParam(value = "from_account_name") String from_account_name,
                                           @RequestParam(value = "to_address") String to_address,
-                                          @RequestParam(value = "memo_message") String memo_message,
-                                          @PathVariable(value = "coinType") String coinType) {
+                                          @RequestParam(value = "contract_id") String contractId) {
         JSONArray params = new JSONArray();
         String url = config.walletUrl;
         String rpcUser = config.rpcUser;
-        String contractId = config.contractId;
         String result;
-        if ("ACT".equals(coinType)) {
+        if (StringUtils.isEmpty(contractId)) {
             params.add(amount_to_transfer);
-            params.add(coinType);
+            params.add("ACT");
             params.add(from_account_name);
             params.add(to_address);
-            params.add(memo_message);
+            params.add(contractId);
             result = httpClient.post(url, rpcUser, "wallet_transfer_to_address", params);
         } else {
             String param = to_address + "|" + amount_to_transfer + "|";

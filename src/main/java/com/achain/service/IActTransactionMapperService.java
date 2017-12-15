@@ -10,5 +10,5 @@ import java.util.Map;
  * @since 2017-12-15 下午4:44
  */
 public interface IActTransactionMapperService extends IService<ActTransaction> {
-    Map<String, Object> WalletAccountTransactionHistory(Long start, String address);
+    Map<String, Object> WalletAccountTransactionHistory(Long start, String address, String contractId);
 }
