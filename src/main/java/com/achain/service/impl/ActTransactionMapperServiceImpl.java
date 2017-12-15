@@ -6,8 +6,8 @@ import com.achain.service.IActTransactionMapperService;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-
 import com.baomidou.mybatisplus.toolkit.CollectionUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +32,11 @@ public class ActTransactionMapperServiceImpl extends ServiceImpl<ActTransactionM
             return map;
         }
         Wrapper<ActTransaction> wrapper = new EntityWrapper<>();
-        wrapper.where("to_addr = " + address)
+        wrapper.where("to_addr = '" + address+"'")
                 .and("block_num >= " + start)
-                .orNew("from_addr = " + address)
+                .orNew("from_addr = '" + address+"'")
                 .and("block_num >= " + start)
-                .orderBy("block_num ACS");
+                .orderBy("block_num ASC");
         List<ActTransaction> actTransactionList = baseMapper.selectList(wrapper);
         if (CollectionUtils.isEmpty(actTransactionList)) {
             map.put("msg", "没有更多的交易记录");
